@@ -7,6 +7,10 @@ learning to code, or learning to write a programming language.
 I implemented the same language in python as well: http://github.com/nthnca/cookie
 
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/nthnca/gocookie?style=flat-square)](https://goreportcard.com/report/github.com/nthnca/gocookie)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/nthnca/gocookie)
+
+
 ## Basic syntax
 
 Assign an integer, 1, to a variable, `v`.
