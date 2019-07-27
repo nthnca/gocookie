@@ -39,7 +39,7 @@ type Tokenizer struct {
 	column    int
 }
 
-type RegexpAction struct {
+type TokenAction struct {
 	Token  int
 	Action func([]byte) error
 }
@@ -80,7 +80,7 @@ func (t *Tokenizer) nextChunk() ([]byte, error) {
 	}
 }
 
-func (t *Tokenizer) NextToken(ra []RegexpAction) error {
+func (t *Tokenizer) NextToken(ra []TokenAction) error {
 	chunk, err := t.nextChunk()
 	if err == io.EOF {
 		return io.EOF

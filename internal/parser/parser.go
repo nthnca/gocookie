@@ -23,7 +23,7 @@ type Statement struct {
 	VarMethod []Statement
 }
 
-func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
+func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	var stmt Statement
 
 	done := func(_ []byte) error {
@@ -43,16 +43,16 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		}
 		stmt.OpType = OP_TYPE_INT
 		// log.Printf("INTEGER: %s", t)
-		err = tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{tokenizer.EOL_TOKEN, done},
+		err = tr.NextToken([]tokenizer.TokenAction{
+			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
 		})
 		return err
 	}
 
 	function := func(_ []byte) error {
 		stmt.OpType = OP_TYPE_FUNC
-		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{tokenizer.EOL_TOKEN, done},
+		err := tr.NextToken([]tokenizer.TokenAction{
+			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
 		})
 		return err
 	}
@@ -66,9 +66,9 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	literal := func(t []byte) error {
 		// log.Printf("LITERAL: %s", t)
 		stmt.VarVar = string(t)
-		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{tokenizer.EOL_TOKEN, done},
-			tokenizer.RegexpAction{tokenizer.FUNCTION_TOKEN, function},
+		err := tr.NextToken([]tokenizer.TokenAction{
+			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
+			tokenizer.TokenAction{tokenizer.FUNCTION_TOKEN, function},
 		})
 		return err
 	}
@@ -82,10 +82,10 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 
 	assign := func(t []byte) error {
 		// log.Printf("ASSIGN: %s", t)
-		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{tokenizer.INT_TOKEN, integer},
-			tokenizer.RegexpAction{tokenizer.IDENT_TOKEN, literal},
-			tokenizer.RegexpAction{tokenizer.CURLY_OPEN_TOKEN, method},
+		err := tr.NextToken([]tokenizer.TokenAction{
+			tokenizer.TokenAction{tokenizer.INT_TOKEN, integer},
+			tokenizer.TokenAction{tokenizer.IDENT_TOKEN, literal},
+			tokenizer.TokenAction{tokenizer.CURLY_OPEN_TOKEN, method},
 		})
 		return err
 	}
@@ -93,16 +93,16 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	ident := func(t []byte) error {
 		// log.Printf("IDENT: %s", t)
 		stmt.Var = string(t)
-		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{tokenizer.ASSIGN_TOKEN, assign},
-			tokenizer.RegexpAction{tokenizer.FUNCTION_TOKEN, function_no_assign},
+		err := tr.NextToken([]tokenizer.TokenAction{
+			tokenizer.TokenAction{tokenizer.ASSIGN_TOKEN, assign},
+			tokenizer.TokenAction{tokenizer.FUNCTION_TOKEN, function_no_assign},
 		})
 		return err
 	}
 
-	err := tr.NextToken([]tokenizer.RegexpAction{
-		tokenizer.RegexpAction{tokenizer.IDENT_TOKEN, ident},
-		tokenizer.RegexpAction{tokenizer.CURLY_CLOSE_TOKEN, curly_close},
+	err := tr.NextToken([]tokenizer.TokenAction{
+		tokenizer.TokenAction{tokenizer.IDENT_TOKEN, ident},
+		tokenizer.TokenAction{tokenizer.CURLY_CLOSE_TOKEN, curly_close},
 	})
 	if err != nil {
 		if err == io.EOF {
@@ -116,7 +116,7 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 func GetMethod(t *tokenizer.Tokenizer) []Statement {
 	method := []Statement{}
 	for {
-		stmt, err := GetNextStmt(t)
+		stmt, err := getNextStmt(t)
 		if err != nil {
 			if err == io.EOF {
 				return method

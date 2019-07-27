@@ -6,43 +6,43 @@ import (
 	"github.com/nthnca/gocookie/internal/parser"
 )
 
-type Op struct {
+type op struct {
 	v_int     int
 	v_builtin func()
 	v_func    []parser.Statement
 }
 
 var (
-	Variables = make(map[string]*Op)
+	variables = make(map[string]*op)
 )
 
 func printx() {
-	x := Variables["_1"].v_int
+	x := variables["_1"].v_int
 	fmt.Printf("%d\n", x)
 }
 
 func addx() {
-	x := Variables["_1"].v_int + Variables["_2"].v_int
-	Variables["_r"] = &Op{x, nil, nil}
+	x := variables["_1"].v_int + variables["_2"].v_int
+	variables["_r"] = &op{x, nil, nil}
 }
 
 func ifx() {
-	if Variables["_1"].v_int != 0 {
-		exe(Variables["_2"])
+	if variables["_1"].v_int != 0 {
+		exe(variables["_2"])
 	}
 }
 
 func loopx() {
-	x := Variables["_1"]
+	x := variables["_1"]
 	for {
 		exe(x)
-		if Variables["_r"].v_int == 0 {
+		if variables["_r"].v_int == 0 {
 			break
 		}
 	}
 }
 
-func exe(op *Op) {
+func exe(op *op) {
 	if op.v_builtin != nil {
 		op.v_builtin()
 	} else {
@@ -54,24 +54,24 @@ func run(m []parser.Statement) {
 	for _, s := range m {
 		switch s.OpType {
 		case parser.OP_TYPE_ASSIGN:
-			Variables[s.Var] = Variables[s.VarVar]
+			variables[s.Var] = variables[s.VarVar]
 		case parser.OP_TYPE_INT:
-			Variables[s.Var] = &Op{s.VarInt, nil, nil}
+			variables[s.Var] = &op{s.VarInt, nil, nil}
 		case parser.OP_TYPE_METHOD:
-			Variables[s.Var] = &Op{0, nil, s.VarMethod}
+			variables[s.Var] = &op{0, nil, s.VarMethod}
 		case parser.OP_TYPE_FUNC:
-			op := Variables[s.VarVar]
+			op := variables[s.VarVar]
 			exe(op)
-			Variables[s.Var] = Variables["_r"]
+			variables[s.Var] = variables["_r"]
 		}
 	}
 }
 
 func Run(m []parser.Statement) {
-	Variables["print"] = &Op{0, printx, nil}
-	Variables["add"] = &Op{0, addx, nil}
-	Variables["if"] = &Op{0, ifx, nil}
-	Variables["loop"] = &Op{0, loopx, nil}
+	variables["print"] = &op{0, printx, nil}
+	variables["add"] = &op{0, addx, nil}
+	variables["if"] = &op{0, ifx, nil}
+	variables["loop"] = &op{0, loopx, nil}
 
 	run(m)
 }
