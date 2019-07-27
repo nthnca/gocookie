@@ -7,9 +7,10 @@ learning to code, or learning to write a programming language.
 I implemented the same language in python as well: http://github.com/nthnca/cookie
 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/nthnca/gocookie?style=flat-square)](https://goreportcard.com/report/github.com/nthnca/gocookie)
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/nthnca/gocookie)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nthnca/gocookie?style=flat-square)](https://goreportcard.com/report/github.com/nthnca/gocookie)
 [![Latest Version](https://img.shields.io/github/release/nthnca/gocookie.svg?style=flat-square)](https://github.com/nthnca/gocookie/releases)
+[![Latest Version](https://img.shields.io/github/license/nthnca/gocookie.svg?style=flat-square)](https://github.com/nthnca/gocookie/blob/master/LICENSE)
 
 
 ## Basic syntax
