@@ -3,21 +3,12 @@ package parser
 import (
 	"io"
 	"log"
-	"regexp"
 	"strconv"
 
 	"github.com/nthnca/gocookie/internal/tokenizer"
 )
 
 var (
-	IDENT_RE       *regexp.Regexp = regexp.MustCompile("^[a-z_][a-z0-9_]*")
-	INT_RE         *regexp.Regexp = regexp.MustCompile("^[-]?[1-9][0-9]*|0")
-	ASSIGN_RE      *regexp.Regexp = regexp.MustCompile("^=")
-	EOL_RE         *regexp.Regexp = regexp.MustCompile("^;")
-	CURLY_OPEN_RE  *regexp.Regexp = regexp.MustCompile("^{")
-	CURLY_CLOSE_RE *regexp.Regexp = regexp.MustCompile("^}")
-	FUNCTION_RE    *regexp.Regexp = regexp.MustCompile("^[(][)]")
-
 	OP_TYPE_ASSIGN int = 0
 	OP_TYPE_INT    int = 1
 	OP_TYPE_FUNC   int = 2
@@ -53,7 +44,7 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		stmt.OpType = OP_TYPE_INT
 		// log.Printf("INTEGER: %s", t)
 		err = tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{EOL_RE, done},
+			tokenizer.RegexpAction{tokenizer.EOL_TOKEN, done},
 		})
 		return err
 	}
@@ -61,7 +52,7 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	function := func(_ []byte) error {
 		stmt.OpType = OP_TYPE_FUNC
 		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{EOL_RE, done},
+			tokenizer.RegexpAction{tokenizer.EOL_TOKEN, done},
 		})
 		return err
 	}
@@ -76,8 +67,8 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		// log.Printf("LITERAL: %s", t)
 		stmt.VarVar = string(t)
 		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{EOL_RE, done},
-			tokenizer.RegexpAction{FUNCTION_RE, function},
+			tokenizer.RegexpAction{tokenizer.EOL_TOKEN, done},
+			tokenizer.RegexpAction{tokenizer.FUNCTION_TOKEN, function},
 		})
 		return err
 	}
@@ -92,9 +83,9 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	assign := func(t []byte) error {
 		// log.Printf("ASSIGN: %s", t)
 		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{INT_RE, integer},
-			tokenizer.RegexpAction{IDENT_RE, literal},
-			tokenizer.RegexpAction{CURLY_OPEN_RE, method},
+			tokenizer.RegexpAction{tokenizer.INT_TOKEN, integer},
+			tokenizer.RegexpAction{tokenizer.IDENT_TOKEN, literal},
+			tokenizer.RegexpAction{tokenizer.CURLY_OPEN_TOKEN, method},
 		})
 		return err
 	}
@@ -103,15 +94,15 @@ func GetNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		// log.Printf("IDENT: %s", t)
 		stmt.Var = string(t)
 		err := tr.NextToken([]tokenizer.RegexpAction{
-			tokenizer.RegexpAction{ASSIGN_RE, assign},
-			tokenizer.RegexpAction{FUNCTION_RE, function_no_assign},
+			tokenizer.RegexpAction{tokenizer.ASSIGN_TOKEN, assign},
+			tokenizer.RegexpAction{tokenizer.FUNCTION_TOKEN, function_no_assign},
 		})
 		return err
 	}
 
 	err := tr.NextToken([]tokenizer.RegexpAction{
-		tokenizer.RegexpAction{IDENT_RE, ident},
-		tokenizer.RegexpAction{CURLY_CLOSE_RE, curly_close},
+		tokenizer.RegexpAction{tokenizer.IDENT_TOKEN, ident},
+		tokenizer.RegexpAction{tokenizer.CURLY_CLOSE_TOKEN, curly_close},
 	})
 	if err != nil {
 		if err == io.EOF {

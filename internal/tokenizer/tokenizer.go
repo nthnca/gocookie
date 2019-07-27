@@ -9,8 +9,27 @@ import (
 	"regexp"
 )
 
+const (
+	IDENT_TOKEN       = iota
+	INT_TOKEN         = iota
+	ASSIGN_TOKEN      = iota
+	EOL_TOKEN         = iota
+	CURLY_OPEN_TOKEN  = iota
+	CURLY_CLOSE_TOKEN = iota
+	FUNCTION_TOKEN    = iota
+	max_token         = iota
+)
+
 var (
-	WHITE_RE *regexp.Regexp = regexp.MustCompile(`^\s*`)
+	regex          [max_token]*regexp.Regexp
+	white_re       *regexp.Regexp = regexp.MustCompile(`^\s*`)
+	ident_re       *regexp.Regexp = regexp.MustCompile("^[a-z_][a-z0-9_]*")
+	int_re         *regexp.Regexp = regexp.MustCompile("^[-]?[1-9][0-9]*|0")
+	assign_re      *regexp.Regexp = regexp.MustCompile("^=")
+	eol_re         *regexp.Regexp = regexp.MustCompile("^;")
+	curly_open_re  *regexp.Regexp = regexp.MustCompile("^{")
+	curly_close_re *regexp.Regexp = regexp.MustCompile("^}")
+	function_re    *regexp.Regexp = regexp.MustCompile("^[(][)]")
 )
 
 type Tokenizer struct {
@@ -21,8 +40,18 @@ type Tokenizer struct {
 }
 
 type RegexpAction struct {
-	Re     *regexp.Regexp
+	Token  int
 	Action func([]byte) error
+}
+
+func init() {
+	regex[IDENT_TOKEN] = ident_re
+	regex[INT_TOKEN] = int_re
+	regex[ASSIGN_TOKEN] = assign_re
+	regex[EOL_TOKEN] = eol_re
+	regex[CURLY_OPEN_TOKEN] = curly_open_re
+	regex[CURLY_CLOSE_TOKEN] = curly_close_re
+	regex[FUNCTION_TOKEN] = function_re
 }
 
 func CreateTokenizer(rd io.Reader) *Tokenizer {
@@ -31,7 +60,7 @@ func CreateTokenizer(rd io.Reader) *Tokenizer {
 
 func (t *Tokenizer) nextChunk() ([]byte, error) {
 	for {
-		m := WHITE_RE.Find(t.curr_line)
+		m := white_re.Find(t.curr_line)
 		if len(m) != len(t.curr_line) {
 			t.column += len(m)
 			t.curr_line = t.curr_line[len(m):]
@@ -58,7 +87,7 @@ func (t *Tokenizer) NextToken(ra []RegexpAction) error {
 	}
 
 	for _, e := range ra {
-		m := e.Re.Find(chunk)
+		m := regex[e.Token].Find(chunk)
 		if len(m) == 0 {
 			continue
 		}
