@@ -1,0 +1,45 @@
+#!/bin/bash
+
+ls tests/* > /tmp/.tests
+
+if [ "$1" ]; then
+  echo "Filter tests: $1"
+  grep "$1" /tmp/.tests > /tmp/.tmp
+  mv /tmp/.tmp /tmp/.tests
+fi
+
+run_tests() {
+
+for x in `grep tests/pass /tmp/.tests`; do
+  echo Executing Test: $x
+  sed -n '/START_PROGRAM/,/END_PROGRAM/ p' $x | tail -n +2 | head -n -1 > /tmp/.in
+  sed -n '/START_OUTPUT/,/END_OUTPUT/ p' $x | tail -n +2 | head -n -1 > /tmp/.out
+
+  ./gocookie < /tmp/.in > /tmp/.res
+  diff /tmp/.res /tmp/.out
+  if [ "$?" -eq 0 ]; then
+    echo "  Test Passed"
+  else
+    echo "  Test Failed"
+    break
+  fi
+done
+
+}
+
+
+while true; do
+
+test $? -eq 0 && echo build && go build
+test $? -eq 0 && echo vet && shadow github.com/nthnca/gocookie
+test $? -eq 0 && echo test && go test
+test $? -eq 0 && echo test && run_tests
+echo
+echo
+
+sleep 1
+echo WAITING...
+inotifywait -q -r -e modify,create,delete,move .
+sleep 1
+
+done

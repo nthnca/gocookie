@@ -1,0 +1,8 @@
+START_PROGRAM
+   a    =     3     ;    _1    =25; _  = print(); print  ();
+END_PROGRAM
+
+START_OUTPUT
+25
+25
+END_OUTPUT

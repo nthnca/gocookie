@@ -1,0 +1,25 @@
+START_PROGRAM
+a = {
+r=20;
+}
+
+r=10;
+_1=1;
+_2=a;
+if();
+_1=r;
+print();
+
+r=10;
+_1=0;
+_2=a;
+if();
+_1=r;
+print();
+
+END_PROGRAM
+
+START_OUTPUT
+20
+10
+END_OUTPUT

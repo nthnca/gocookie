@@ -1,0 +1,12 @@
+START_PROGRAM
+_1=-10;
+print();
+_2=10;
+_1=add();
+print();
+END_PROGRAM
+
+START_OUTPUT
+-10
+0
+END_OUTPUT

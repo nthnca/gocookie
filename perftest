@@ -1,0 +1,21 @@
+decr={
+  _2=-1;
+  _r=add();
+}
+
+stop=300000;
+payload={
+  _1=stop;
+  stop=decr();
+
+  _1=stop;
+  print();
+  _r=0;
+  _2={
+    _r=1;
+  }
+  if();
+}
+
+_1=payload;
+loop();
