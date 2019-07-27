@@ -67,6 +67,8 @@ func run(m []parser.Statement) {
 	}
 }
 
+// Run is the entry point for executing a set of cookie Statements, or in other words
+// it is the entry point for the created program.
 func Run(m []parser.Statement) {
 	variables["print"] = &op{0, printx, nil}
 	variables["add"] = &op{0, addx, nil}

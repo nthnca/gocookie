@@ -9,15 +9,23 @@ import (
 )
 
 const (
+	// OpTypeAssign is for assigning the value of one variable to another variable.
 	OpTypeAssign = iota
-	OpTypeInt    = iota
-	OpTypeFunc   = iota
+
+	// OpTypeInt is an integer assignment to a variable.
+	OpTypeInt = iota
+
+	// OpTypeFunc is for executing a function.
+	OpTypeFunc = iota
+
+	// OpTypeMethod is for the creation of a function.
 	OpTypeMethod = iota
 )
 
+// Statement is the  internal representation of a line of cookie code.
 type Statement struct {
-	Var       string
 	OpType    int
+	Var       string
 	VarInt    int
 	VarVar    string
 	VarMethod []Statement
@@ -109,6 +117,9 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	return &stmt, nil
 }
 
+// GetMethod parses up to the end of the current method and returns the set of
+// statements contained within. It determines the end of the method either by finding
+// the closing '}' or the end-of-file.
 func GetMethod(t *tokenizer.Tokenizer) []Statement {
 	method := []Statement{}
 	for {

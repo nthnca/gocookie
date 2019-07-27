@@ -1,3 +1,5 @@
+// Package tokenizer provides functionality for splitting Cookie source code into
+// *tokens*.
 package tokenizer
 
 import (
@@ -9,14 +11,27 @@ import (
 )
 
 const (
-	IdentToken       = iota
-	IntToken         = iota
-	AssignToken      = iota
-	EolToken         = iota
-	CurlyOpenToken  = iota
+	// IdentToken is a cookie language identifier: [a-z_][a-z0-9_]*
+	IdentToken = iota
+
+	// IntToken is a cookie language integer: [-]?[1-9][0-9]*|0
+	IntToken = iota
+
+	// AssignToken is a cookie language assignment token: =
+	AssignToken = iota
+
+	// EolToken is a cookie language assignment end-of-line token: ;
+	EolToken = iota
+
+	// CurlyOpenToken is a cookie language method creation token: {
+	CurlyOpenToken = iota
+
+	// CurlyCloseToken is a cookie language method end token: {
 	CurlyCloseToken = iota
-	FunctionToken    = iota
-	maxToken          = iota
+
+	// FunctionToken is a cookie language function token: ()
+	FunctionToken = iota
+	maxToken      = iota
 )
 
 var (
@@ -31,6 +46,7 @@ var (
 	functionRe   = regexp.MustCompile("^[(][)]")
 )
 
+// Tokenizer is the basic handle that stores state for tokenizer a given IO stream.
 type Tokenizer struct {
 	reader   *bufio.Reader
 	currLine []byte
@@ -38,6 +54,9 @@ type Tokenizer struct {
 	column   int
 }
 
+// TokenAction is a simple mapping of a token type (IdentToken, IntToken, etc) to a
+// method that will be invoked if that type of token is found. The []byte will be the
+// token that was found.
 type TokenAction struct {
 	Token  int
 	Action func([]byte) error
@@ -53,6 +72,8 @@ func init() {
 	regex[FunctionToken] = functionRe
 }
 
+// CreateTokenizer initializes and returns a Tokenizer object that can be used to
+// split the IO stream into a series of tokens.
 func CreateTokenizer(rd io.Reader) *Tokenizer {
 	return &Tokenizer{bufio.NewReader(rd), make([]byte, 0), 0, 0}
 }
@@ -79,6 +100,9 @@ func (t *Tokenizer) nextChunk() ([]byte, error) {
 	}
 }
 
+// NextToken takes a set of TokenActions and based on which Token is found next,
+// invokes the given action associated with it. An error is returned if none of the
+// given tokens is found next.
 func (t *Tokenizer) NextToken(ra []TokenAction) error {
 	chunk, err := t.nextChunk()
 	if err == io.EOF {
