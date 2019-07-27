@@ -7,9 +7,9 @@ import (
 )
 
 type op struct {
-	v_int     int
-	v_builtin func()
-	v_func    []parser.Statement
+	vInt     int
+	vBuiltin func()
+	vFunc    []parser.Statement
 }
 
 var (
@@ -17,17 +17,17 @@ var (
 )
 
 func printx() {
-	x := variables["_1"].v_int
+	x := variables["_1"].vInt
 	fmt.Printf("%d\n", x)
 }
 
 func addx() {
-	x := variables["_1"].v_int + variables["_2"].v_int
+	x := variables["_1"].vInt + variables["_2"].vInt
 	variables["_r"] = &op{x, nil, nil}
 }
 
 func ifx() {
-	if variables["_1"].v_int != 0 {
+	if variables["_1"].vInt != 0 {
 		exe(variables["_2"])
 	}
 }
@@ -36,30 +36,30 @@ func loopx() {
 	x := variables["_1"]
 	for {
 		exe(x)
-		if variables["_r"].v_int == 0 {
+		if variables["_r"].vInt == 0 {
 			break
 		}
 	}
 }
 
 func exe(op *op) {
-	if op.v_builtin != nil {
-		op.v_builtin()
+	if op.vBuiltin != nil {
+		op.vBuiltin()
 	} else {
-		run(op.v_func)
+		run(op.vFunc)
 	}
 }
 
 func run(m []parser.Statement) {
 	for _, s := range m {
 		switch s.OpType {
-		case parser.OP_TYPE_ASSIGN:
+		case parser.OpTypeAssign:
 			variables[s.Var] = variables[s.VarVar]
-		case parser.OP_TYPE_INT:
+		case parser.OpTypeInt:
 			variables[s.Var] = &op{s.VarInt, nil, nil}
-		case parser.OP_TYPE_METHOD:
+		case parser.OpTypeMethod:
 			variables[s.Var] = &op{0, nil, s.VarMethod}
-		case parser.OP_TYPE_FUNC:
+		case parser.OpTypeFunc:
 			op := variables[s.VarVar]
 			exe(op)
 			variables[s.Var] = variables["_r"]

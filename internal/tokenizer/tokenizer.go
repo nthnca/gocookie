@@ -2,7 +2,6 @@ package tokenizer
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,33 +9,33 @@ import (
 )
 
 const (
-	IDENT_TOKEN       = iota
-	INT_TOKEN         = iota
-	ASSIGN_TOKEN      = iota
-	EOL_TOKEN         = iota
-	CURLY_OPEN_TOKEN  = iota
-	CURLY_CLOSE_TOKEN = iota
-	FUNCTION_TOKEN    = iota
-	max_token         = iota
+	IdentToken       = iota
+	IntToken         = iota
+	AssignToken      = iota
+	EolToken         = iota
+	CurlyOpenToken  = iota
+	CurlyCloseToken = iota
+	FunctionToken    = iota
+	maxToken          = iota
 )
 
 var (
-	regex          [max_token]*regexp.Regexp
-	white_re       *regexp.Regexp = regexp.MustCompile(`^\s*`)
-	ident_re       *regexp.Regexp = regexp.MustCompile("^[a-z_][a-z0-9_]*")
-	int_re         *regexp.Regexp = regexp.MustCompile("^[-]?[1-9][0-9]*|0")
-	assign_re      *regexp.Regexp = regexp.MustCompile("^=")
-	eol_re         *regexp.Regexp = regexp.MustCompile("^;")
-	curly_open_re  *regexp.Regexp = regexp.MustCompile("^{")
-	curly_close_re *regexp.Regexp = regexp.MustCompile("^}")
-	function_re    *regexp.Regexp = regexp.MustCompile("^[(][)]")
+	regex        [maxToken]*regexp.Regexp
+	whiteRe      = regexp.MustCompile(`^\s*`)
+	identRe      = regexp.MustCompile("^[a-z_][a-z0-9_]*")
+	intRe        = regexp.MustCompile("^[-]?[1-9][0-9]*|0")
+	assignRe     = regexp.MustCompile("^=")
+	eolRe        = regexp.MustCompile("^;")
+	curlyOpenRe  = regexp.MustCompile("^{")
+	curlyCloseRe = regexp.MustCompile("^}")
+	functionRe   = regexp.MustCompile("^[(][)]")
 )
 
 type Tokenizer struct {
-	reader    *bufio.Reader
-	curr_line []byte
-	line      int
-	column    int
+	reader   *bufio.Reader
+	currLine []byte
+	line     int
+	column   int
 }
 
 type TokenAction struct {
@@ -45,13 +44,13 @@ type TokenAction struct {
 }
 
 func init() {
-	regex[IDENT_TOKEN] = ident_re
-	regex[INT_TOKEN] = int_re
-	regex[ASSIGN_TOKEN] = assign_re
-	regex[EOL_TOKEN] = eol_re
-	regex[CURLY_OPEN_TOKEN] = curly_open_re
-	regex[CURLY_CLOSE_TOKEN] = curly_close_re
-	regex[FUNCTION_TOKEN] = function_re
+	regex[IdentToken] = identRe
+	regex[IntToken] = intRe
+	regex[AssignToken] = assignRe
+	regex[EolToken] = eolRe
+	regex[CurlyOpenToken] = curlyOpenRe
+	regex[CurlyCloseToken] = curlyCloseRe
+	regex[FunctionToken] = functionRe
 }
 
 func CreateTokenizer(rd io.Reader) *Tokenizer {
@@ -60,11 +59,11 @@ func CreateTokenizer(rd io.Reader) *Tokenizer {
 
 func (t *Tokenizer) nextChunk() ([]byte, error) {
 	for {
-		m := white_re.Find(t.curr_line)
-		if len(m) != len(t.curr_line) {
+		m := whiteRe.Find(t.currLine)
+		if len(m) != len(t.currLine) {
 			t.column += len(m)
-			t.curr_line = t.curr_line[len(m):]
-			return t.curr_line, nil
+			t.currLine = t.currLine[len(m):]
+			return t.currLine, nil
 		}
 
 		line, _, err := t.reader.ReadLine()
@@ -74,8 +73,8 @@ func (t *Tokenizer) nextChunk() ([]byte, error) {
 			}
 			log.Fatalf("Unexpected error while reading: %s", err)
 		}
-		t.curr_line = line
-		t.line += 1
+		t.currLine = line
+		t.line++
 		t.column = 0
 	}
 }
@@ -92,10 +91,10 @@ func (t *Tokenizer) NextToken(ra []TokenAction) error {
 			continue
 		}
 		t.column += len(m)
-		t.curr_line = t.curr_line[len(m):]
+		t.currLine = t.currLine[len(m):]
 		return e.Action(m)
 	}
 
-	return errors.New(fmt.Sprintf("Unexpected token (line %d, col %d): '%s'",
-		t.line, t.column, chunk))
+	return fmt.Errorf("Unexpected token (line %d, col %d): '%s'",
+		t.line, t.column, chunk)
 }

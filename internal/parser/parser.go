@@ -8,11 +8,11 @@ import (
 	"github.com/nthnca/gocookie/internal/tokenizer"
 )
 
-var (
-	OP_TYPE_ASSIGN int = 0
-	OP_TYPE_INT    int = 1
-	OP_TYPE_FUNC   int = 2
-	OP_TYPE_METHOD int = 3
+const (
+	OpTypeAssign = iota
+	OpTypeInt    = iota
+	OpTypeFunc   = iota
+	OpTypeMethod = iota
 )
 
 type Statement struct {
@@ -30,7 +30,7 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		return nil
 	}
 
-	curly_close := func(_ []byte) error {
+	curlyClose := func(_ []byte) error {
 		// TODO: This case is invalid if this isn't an embedded method.
 		return io.EOF
 	}
@@ -41,22 +41,22 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		if err != nil {
 			log.Fatalf("How..., %v", err)
 		}
-		stmt.OpType = OP_TYPE_INT
+		stmt.OpType = OpTypeInt
 		err = tr.NextToken([]tokenizer.TokenAction{
-			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
+			{tokenizer.EolToken, done},
 		})
 		return err
 	}
 
 	function := func(_ []byte) error {
-		stmt.OpType = OP_TYPE_FUNC
+		stmt.OpType = OpTypeFunc
 		err := tr.NextToken([]tokenizer.TokenAction{
-			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
+			{tokenizer.EolToken, done},
 		})
 		return err
 	}
 
-	function_no_assign := func(t []byte) error {
+	functionNoAssign := func(t []byte) error {
 		stmt.VarVar = stmt.Var
 		stmt.Var = "_"
 		return function(t)
@@ -65,14 +65,14 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	literal := func(t []byte) error {
 		stmt.VarVar = string(t)
 		err := tr.NextToken([]tokenizer.TokenAction{
-			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
-			tokenizer.TokenAction{tokenizer.FUNCTION_TOKEN, function},
+			{tokenizer.EolToken, done},
+			{tokenizer.FunctionToken, function},
 		})
 		return err
 	}
 
 	method := func(t []byte) error {
-		stmt.OpType = OP_TYPE_METHOD
+		stmt.OpType = OpTypeMethod
 		stmt.VarMethod = GetMethod(tr)
 
 		return nil
@@ -80,9 +80,9 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 
 	assign := func(t []byte) error {
 		err := tr.NextToken([]tokenizer.TokenAction{
-			tokenizer.TokenAction{tokenizer.INT_TOKEN, integer},
-			tokenizer.TokenAction{tokenizer.IDENT_TOKEN, literal},
-			tokenizer.TokenAction{tokenizer.CURLY_OPEN_TOKEN, method},
+			{tokenizer.IntToken, integer},
+			{tokenizer.IdentToken, literal},
+			{tokenizer.CurlyOpenToken, method},
 		})
 		return err
 	}
@@ -90,15 +90,15 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	ident := func(t []byte) error {
 		stmt.Var = string(t)
 		err := tr.NextToken([]tokenizer.TokenAction{
-			tokenizer.TokenAction{tokenizer.ASSIGN_TOKEN, assign},
-			tokenizer.TokenAction{tokenizer.FUNCTION_TOKEN, function_no_assign},
+			{tokenizer.AssignToken, assign},
+			{tokenizer.FunctionToken, functionNoAssign},
 		})
 		return err
 	}
 
 	err := tr.NextToken([]tokenizer.TokenAction{
-		tokenizer.TokenAction{tokenizer.IDENT_TOKEN, ident},
-		tokenizer.TokenAction{tokenizer.CURLY_CLOSE_TOKEN, curly_close},
+		{tokenizer.IdentToken, ident},
+		{tokenizer.CurlyCloseToken, curlyClose},
 	})
 	if err != nil {
 		if err == io.EOF {
@@ -121,5 +121,4 @@ func GetMethod(t *tokenizer.Tokenizer) []Statement {
 		}
 		method = append(method, *stmt)
 	}
-	return method
 }

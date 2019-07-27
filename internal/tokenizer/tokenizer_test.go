@@ -19,7 +19,7 @@ func SimpleHarness(tst *testing.T, in string, token int, expected string, ee err
 
 	err :=
 		tokenizer.CreateTokenizer(bytes.NewReader([]byte(in))).NextToken(
-			[]tokenizer.TokenAction{tokenizer.TokenAction{token, callback}})
+			[]tokenizer.TokenAction{{token, callback}})
 	if err != nil {
 		if ee == nil {
 			tst.Errorf("Unexpected error: %q", err)
@@ -28,9 +28,9 @@ func SimpleHarness(tst *testing.T, in string, token int, expected string, ee err
 }
 
 func TestIdentToken(tst *testing.T) {
-	SimpleHarness(tst, "   input", tokenizer.IDENT_TOKEN, "input", nil)
+	SimpleHarness(tst, "   input", tokenizer.IdentToken, "input", nil)
 }
 
 func TestIdentTokenWithColon(tst *testing.T) {
-	SimpleHarness(tst, "   :in\nas", tokenizer.IDENT_TOKEN, "", fmt.Errorf("hi"))
+	SimpleHarness(tst, "   :in\nas", tokenizer.IdentToken, "", fmt.Errorf("hi"))
 }
