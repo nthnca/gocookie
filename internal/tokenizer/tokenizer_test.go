@@ -1,4 +1,4 @@
-package main
+package tokenizer
 
 /*
 func TestHello(t *testing.T) {
