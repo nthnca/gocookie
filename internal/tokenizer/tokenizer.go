@@ -4,10 +4,10 @@ package tokenizer
 
 import (
 	"bufio"
-	"fmt"
 	"io"
-	"log"
 	"regexp"
+
+	"golang.org/x/xerrors"
 )
 
 const (
@@ -31,7 +31,8 @@ const (
 
 	// FunctionToken is a cookie language function token: ()
 	FunctionToken = iota
-	maxToken      = iota
+
+	maxToken = iota
 )
 
 var (
@@ -89,14 +90,12 @@ func (t *Tokenizer) nextChunk() ([]byte, error) {
 
 		line, _, err := t.reader.ReadLine()
 		if err != nil {
-			if err == io.EOF {
-				return nil, io.EOF
-			}
-			log.Fatalf("Unexpected error while reading: %s", err)
+			return nil, xerrors.Errorf(
+				"unable to get the next chunk: %w", err)
 		}
 		t.currLine = line
 		t.line++
-		t.column = 0
+		t.column = 1
 	}
 }
 
@@ -105,8 +104,9 @@ func (t *Tokenizer) nextChunk() ([]byte, error) {
 // given tokens is found next.
 func (t *Tokenizer) NextToken(ra []TokenAction) error {
 	chunk, err := t.nextChunk()
-	if err == io.EOF {
-		return io.EOF
+	if xerrors.Is(err, io.EOF) {
+		return xerrors.Errorf(
+			"unable to get the next token: %w", err)
 	}
 
 	for _, e := range ra {
@@ -119,6 +119,6 @@ func (t *Tokenizer) NextToken(ra []TokenAction) error {
 		return e.Action(m)
 	}
 
-	return fmt.Errorf("Unexpected token (line %d, col %d): '%s'",
+	return xerrors.Errorf("unexpected input (line %d, col %d): '%s'",
 		t.line, t.column, chunk)
 }
