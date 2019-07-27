@@ -8,6 +8,7 @@ if [ "$1" ]; then
   mv /tmp/.tmp /tmp/.tests
 fi
 
+
 run_tests() {
 
 for x in `grep tests/pass /tmp/.tests`; do
@@ -21,7 +22,7 @@ for x in `grep tests/pass /tmp/.tests`; do
     echo "  Test Passed"
   else
     echo "  Test Failed"
-    break
+    return 1
   fi
 done
 
@@ -30,16 +31,14 @@ done
 
 while true; do
 
-test $? -eq 0 && echo build && go build
-test $? -eq 0 && echo vet && shadow github.com/nthnca/gocookie
-test $? -eq 0 && echo test && go test ./...
-test $? -eq 0 && echo test && run_tests
-echo
-echo
+test $? -eq 0 && echo building... && go build
+test $? -eq 0 && echo vetting... && shadow github.com/nthnca/gocookie
+test $? -eq 0 && echo unittesting... && go test ./...
+test $? -eq 0 && echo testing... && run_tests
+test $? -eq 0 && echo linting... && golint ./...
+echo "###############  WAITING  ######################"
 
-sleep 1
-echo WAITING...
 inotifywait -q -r -e modify,create,delete,move .
-sleep 1
+sleep 1  # Let filesystem settle down, don't want files in a partially saved state.
 
 done
