@@ -42,7 +42,6 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 			log.Fatalf("How..., %v", err)
 		}
 		stmt.OpType = OP_TYPE_INT
-		// log.Printf("INTEGER: %s", t)
 		err = tr.NextToken([]tokenizer.TokenAction{
 			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
 		})
@@ -64,7 +63,6 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	}
 
 	literal := func(t []byte) error {
-		// log.Printf("LITERAL: %s", t)
 		stmt.VarVar = string(t)
 		err := tr.NextToken([]tokenizer.TokenAction{
 			tokenizer.TokenAction{tokenizer.EOL_TOKEN, done},
@@ -81,7 +79,6 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	}
 
 	assign := func(t []byte) error {
-		// log.Printf("ASSIGN: %s", t)
 		err := tr.NextToken([]tokenizer.TokenAction{
 			tokenizer.TokenAction{tokenizer.INT_TOKEN, integer},
 			tokenizer.TokenAction{tokenizer.IDENT_TOKEN, literal},
@@ -91,7 +88,6 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	}
 
 	ident := func(t []byte) error {
-		// log.Printf("IDENT: %s", t)
 		stmt.Var = string(t)
 		err := tr.NextToken([]tokenizer.TokenAction{
 			tokenizer.TokenAction{tokenizer.ASSIGN_TOKEN, assign},

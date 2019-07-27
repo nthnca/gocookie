@@ -32,7 +32,7 @@ while true; do
 
 test $? -eq 0 && echo build && go build
 test $? -eq 0 && echo vet && shadow github.com/nthnca/gocookie
-test $? -eq 0 && echo test && go test
+test $? -eq 0 && echo test && go test ./...
 test $? -eq 0 && echo test && run_tests
 echo
 echo
