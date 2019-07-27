@@ -10,6 +10,6 @@ import (
 
 func main() {
 	t := tokenizer.CreateTokenizer(os.Stdin)
-	m := parser.GetMethod(t)
-	cookie.Run(m)
+	stmts := parser.GetFunction(t)
+	cookie.Run(stmts)
 }

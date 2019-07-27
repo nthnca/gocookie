@@ -18,17 +18,17 @@ const (
 	// OpTypeFunc is for executing a function.
 	OpTypeFunc = iota
 
-	// OpTypeMethod is for the creation of a function.
-	OpTypeMethod = iota
+	// OpTypeFuncCreate is for the creation of a function.
+	OpTypeFuncCreate = iota
 )
 
 // Statement is the  internal representation of a line of cookie code.
 type Statement struct {
-	OpType    int
-	Var       string
-	VarInt    int
-	VarVar    string
-	VarMethod []Statement
+	OpType   int
+	Var      string
+	VarInt   int
+	VarVar   string
+	VarStmts []Statement
 }
 
 func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
@@ -79,9 +79,9 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		return err
 	}
 
-	method := func(t []byte) error {
-		stmt.OpType = OpTypeMethod
-		stmt.VarMethod = GetMethod(tr)
+	createFunc := func(t []byte) error {
+		stmt.OpType = OpTypeFuncCreate
+		stmt.VarStmts = GetFunction(tr)
 
 		return nil
 	}
@@ -90,7 +90,7 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 		err := tr.NextToken([]tokenizer.TokenAction{
 			{tokenizer.IntToken, integer},
 			{tokenizer.IdentToken, literal},
-			{tokenizer.CurlyOpenToken, method},
+			{tokenizer.CurlyOpenToken, createFunc},
 		})
 		return err
 	}
@@ -117,19 +117,19 @@ func getNextStmt(tr *tokenizer.Tokenizer) (*Statement, error) {
 	return &stmt, nil
 }
 
-// GetMethod parses up to the end of the current method and returns the set of
-// statements contained within. It determines the end of the method either by finding
+// GetFunction parses up to the end of the current function and returns the set of
+// statements contained within. It determines the end of the function either by finding
 // the closing '}' or the end-of-file.
-func GetMethod(t *tokenizer.Tokenizer) []Statement {
-	method := []Statement{}
+func GetFunction(t *tokenizer.Tokenizer) []Statement {
+	stmts := []Statement{}
 	for {
 		stmt, err := getNextStmt(t)
 		if err != nil {
 			if err == io.EOF {
-				return method
+				return stmts
 			}
 			log.Fatalf("Oops")
 		}
-		method = append(method, *stmt)
+		stmts = append(stmts, *stmt)
 	}
 }

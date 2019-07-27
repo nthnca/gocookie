@@ -57,8 +57,8 @@ func run(m []parser.Statement) {
 			variables[s.Var] = variables[s.VarVar]
 		case parser.OpTypeInt:
 			variables[s.Var] = &op{s.VarInt, nil, nil}
-		case parser.OpTypeMethod:
-			variables[s.Var] = &op{0, nil, s.VarMethod}
+		case parser.OpTypeFuncCreate:
+			variables[s.Var] = &op{0, nil, s.VarStmts}
 		case parser.OpTypeFunc:
 			op := variables[s.VarVar]
 			exe(op)

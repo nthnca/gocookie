@@ -23,10 +23,10 @@ const (
 	// EolToken is a cookie language assignment end-of-line token: ;
 	EolToken = iota
 
-	// CurlyOpenToken is a cookie language method creation token: {
+	// CurlyOpenToken is a cookie language function creation token: {
 	CurlyOpenToken = iota
 
-	// CurlyCloseToken is a cookie language method end token: {
+	// CurlyCloseToken is a cookie language function end token: {
 	CurlyCloseToken = iota
 
 	// FunctionToken is a cookie language function token: ()
@@ -55,7 +55,7 @@ type Tokenizer struct {
 }
 
 // TokenAction is a simple mapping of a token type (IdentToken, IntToken, etc) to a
-// method that will be invoked if that type of token is found. The []byte will be the
+// function that will be invoked if that type of token is found. The []byte will be the
 // token that was found.
 type TokenAction struct {
 	Token  int
