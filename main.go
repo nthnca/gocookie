@@ -1,3 +1,7 @@
+// Package main provides a command line interface for running "cookie" code.
+// Example: "gocookie < source.cookie"
+//
+// For more documentation about this language see: https://github.com/nthnca/gocookie
 package main
 
 import (
